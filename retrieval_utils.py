@@ -1,10 +1,5 @@
-import dataretrieval.nwis as nwis
-import geopandas as gpd
-from shapely.geometry import Point, box, Polygon, MultiPolygon
 import requests
 import pandas as pd
-import datetime as dt
-import earthaccess
 from tqdm import tqdm
 
 # get site numbers based on state and non-empty params
@@ -28,7 +23,7 @@ def get_param_sites(param_codes_str, state_code, start_date, end_date):
     return pd.DataFrame()
 
 # point based granule search
-def get_site_granules(site_no, site_lat, site_lon, temporal_str):
+def get_site_granules(site_no, station_nm, site_lat, site_lon, temporal_str):
     doi = '10.5067/EMIT/EMITL2ARFL.001'
     cmrurl = 'https://cmr.earthdata.nasa.gov/search/'
     doisearch = cmrurl + 'collections.json?doi=' + doi
@@ -58,6 +53,7 @@ def get_site_granules(site_no, site_lat, site_lon, temporal_str):
                 
                 granule_arr.append({
                     "site_no": site_no,
+                    "station_nm": station_nm,
                     "site_lat": site_lat,
                     "site_lon": site_lon,
                     "granule_urls": granule_urls,
@@ -76,9 +72,10 @@ def get_all_site_granules(site_list, temporal_str):
     with tqdm(total=len(site_list), desc="Processing sites") as pbar:
         for i, row in site_list.iterrows():
             site_no = row['site_no']
+            station_nm = row['station_nm']
             site_lat = row['dec_lat_va']
             site_lon = row['dec_long_va']   
-            site_granules = get_site_granules(site_no, site_lat, site_lon, temporal_str)
+            site_granules = get_site_granules(site_no, station_nm, site_lat, site_lon, temporal_str)
             all_granules.extend(site_granules)
             pbar.update(1)
         
@@ -114,6 +111,7 @@ def match_granules(df_granules, param_codes):
     with tqdm(total=len(df_granules), desc="Processing granules") as pbar:
         for index, row in df_granules.iterrows():
             site_no = row['site_no']
+            station_nm = row['station_nm']
             site_lat = row['site_lat']
             site_lon = row['site_lon']
             granule_time = pd.to_datetime(row['datetime']) 
@@ -132,6 +130,7 @@ def match_granules(df_granules, param_codes):
                             closest_time = time_between
                             closest_result = {
                                 "site_no": site_no,
+                                "station_nm": station_nm,
                                 "site_lat": site_lat,
                                 "site_lon": site_lon,
                                 "granule_time": granule_time,
