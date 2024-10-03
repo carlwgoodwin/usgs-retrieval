@@ -1,4 +1,4 @@
-Currently the retrieval_howto is working and will go from search criteria in the form of USGS param_codes, state_codes, site_types, dates and give you an output of data with granule urls and the matching USGS measurements. 
+Currently the retrieval_howto is working and will go from search criteria in the form of USGS param_codes, state_codes, site_types, dates and give you an output of data with granule urls and the matching USGS measurements. Currently working on utilising Appeears data. 
 
 
 
